@@ -67,7 +67,7 @@ async function withPageName(
   name: string,
   fn: (page: Page, address: string) => Promise<void>,
 ) {
-  console.log(name)
+  console.log(name);
   const { lines, serverProcess, address } = await startFreshServer({
     args: ["run", "-A", name],
   });
