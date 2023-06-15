@@ -12,14 +12,16 @@ export default function Counter(props: CounterProps) {
   return (
     <div class="bg-gray-100 p-4 border border-gray-200 flex items-center justify-around">
       <RoundedButton
+        id="sub-rounded-btn"
         title="Subtract 1"
         onClick={() => count.value -= 1}
         disabled={!IS_BROWSER || count.value <= 0}
       >
         <IconMinus />
       </RoundedButton>
-      <div class="text-3xl tabular-nums">{count}</div>
+      <div class="text-3xl tabular-nums" id="counter">{count}</div>
       <RoundedButton
+        id="add-rounded-btn"
         title="Add 1"
         onClick={() => count.value += 1}
         disabled={!IS_BROWSER}
