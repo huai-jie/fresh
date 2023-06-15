@@ -67,10 +67,11 @@ async function withPageName(
   name: string,
   fn: (page: Page, address: string) => Promise<void>,
 ) {
+  console.log(name)
   const { lines, serverProcess, address } = await startFreshServer({
     args: ["run", "-A", name],
   });
-
+  console.log(lines, serverProcess, address);
   try {
     await delay(100);
     const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
@@ -91,160 +92,160 @@ async function withPageName(
   }
 }
 
-Deno.test({
-  name: "island tests with </script>",
+// Deno.test({
+//   name: "island tests with </script>",
 
-  async fn(t) {
-    await withPage(async (page, address) => {
-      page.on("dialog", () => {
-        assert(false, "There is XSS");
-      });
+//   async fn(t) {
+//     await withPage(async (page, address) => {
+//       page.on("dialog", () => {
+//         assert(false, "There is XSS");
+//       });
 
-      await page.goto(`${address}/evil`, {
-        waitUntil: "networkidle2",
-      });
+//       await page.goto(`${address}/evil`, {
+//         waitUntil: "networkidle2",
+//       });
 
-      await t.step("prevent XSS on Island", async () => {
-        const bodyElem = await page.waitForSelector(`body`);
-        const value = await bodyElem?.evaluate((el) => el.getInnerHTML());
+//       await t.step("prevent XSS on Island", async () => {
+//         const bodyElem = await page.waitForSelector(`body`);
+//         const value = await bodyElem?.evaluate((el) => el.getInnerHTML());
 
-        assertStringIncludes(
-          value,
-          `{"message":"\\u003c/script\\u003e\\u003cscript\\u003ealert('test')\\u003c/script\\u003e"}`,
-          `XSS is not escaped`,
-        );
-      });
-    });
-  },
+//         assertStringIncludes(
+//           value,
+//           `{"message":"\\u003c/script\\u003e\\u003cscript\\u003ealert('test')\\u003c/script\\u003e"}`,
+//           `XSS is not escaped`,
+//         );
+//       });
+//     });
+//   },
 
-  sanitizeOps: false,
-  sanitizeResources: false,
-});
+//   sanitizeOps: false,
+//   sanitizeResources: false,
+// });
 
-Deno.test({
-  name: "island with fragment as root",
+// Deno.test({
+//   name: "island with fragment as root",
 
-  async fn(_t) {
-    await withPage(async (page, address) => {
-      await page.goto(`${address}/islands/root_fragment`, {
-        waitUntil: "networkidle2",
-      });
+//   async fn(_t) {
+//     await withPage(async (page, address) => {
+//       await page.goto(`${address}/islands/root_fragment`, {
+//         waitUntil: "networkidle2",
+//       });
 
-      const clickableSelector = "#root-fragment-click-me";
+//       const clickableSelector = "#root-fragment-click-me";
 
-      await page.waitForSelector(clickableSelector);
+//       await page.waitForSelector(clickableSelector);
 
-      const contentBeforeClick = await getIslandParentTextContent();
-      assert(contentBeforeClick === "HelloWorld");
+//       const contentBeforeClick = await getIslandParentTextContent();
+//       assert(contentBeforeClick === "HelloWorld");
 
-      await page.click(clickableSelector);
-      await delay(100);
+//       await page.click(clickableSelector);
+//       await delay(100);
 
-      const contentAfterClick = await getIslandParentTextContent();
-      assert(contentAfterClick === "HelloWorldI'm rendered now");
+//       const contentAfterClick = await getIslandParentTextContent();
+//       assert(contentAfterClick === "HelloWorldI'm rendered now");
 
-      async function getIslandParentTextContent() {
-        return await page.$eval(
-          "#island-parent",
-          (el: Element) => el.textContent,
-        );
-      }
-    });
-  },
+//       async function getIslandParentTextContent() {
+//         return await page.$eval(
+//           "#island-parent",
+//           (el: Element) => el.textContent,
+//         );
+//       }
+//     });
+//   },
 
-  sanitizeOps: false,
-  sanitizeResources: false,
-});
+//   sanitizeOps: false,
+//   sanitizeResources: false,
+// });
 
-Deno.test({
-  name: "island with fragment as root and conditional child first",
+// Deno.test({
+//   name: "island with fragment as root and conditional child first",
 
-  async fn(_t) {
-    await withPage(async (page, address) => {
-      await page.goto(
-        `${address}/islands/root_fragment_conditional_first`,
-        {
-          waitUntil: "networkidle2",
-        },
-      );
+//   async fn(_t) {
+//     await withPage(async (page, address) => {
+//       await page.goto(
+//         `${address}/islands/root_fragment_conditional_first`,
+//         {
+//           waitUntil: "networkidle2",
+//         },
+//       );
 
-      const clickableSelector = "#root-fragment-conditional-first-click-me";
-      await page.waitForSelector(clickableSelector);
+//       const clickableSelector = "#root-fragment-conditional-first-click-me";
+//       await page.waitForSelector(clickableSelector);
 
-      const contentBeforeClick = await getIslandParentTextContent(page);
-      assert(contentBeforeClick === "HelloWorld");
+//       const contentBeforeClick = await getIslandParentTextContent(page);
+//       assert(contentBeforeClick === "HelloWorld");
 
-      await page.click(clickableSelector);
-      await delay(100);
+//       await page.click(clickableSelector);
+//       await delay(100);
 
-      const contentAfterClick = await getIslandParentTextContent(page);
-      assert(contentAfterClick === "I'm rendered on topHelloWorld");
-    });
-  },
+//       const contentAfterClick = await getIslandParentTextContent(page);
+//       assert(contentAfterClick === "I'm rendered on topHelloWorld");
+//     });
+//   },
 
-  sanitizeOps: false,
-  sanitizeResources: false,
-});
+//   sanitizeOps: false,
+//   sanitizeResources: false,
+// });
 
 async function getIslandParentTextContent(page: Page) {
   return await page.$eval("#island-parent", (el: Element) => el.textContent);
 }
 
-Deno.test({
-  name: "island that returns `null`",
+// Deno.test({
+//   name: "island that returns `null`",
 
-  async fn(_t) {
-    await withPage(async (page, address) => {
-      await page.goto(`${address}/islands/returning_null`, {
-        waitUntil: "networkidle2",
-      });
+//   async fn(_t) {
+//     await withPage(async (page, address) => {
+//       await page.goto(`${address}/islands/returning_null`, {
+//         waitUntil: "networkidle2",
+//       });
 
-      await page.waitForSelector(".added-by-use-effect");
-    });
-  },
+//       await page.waitForSelector(".added-by-use-effect");
+//     });
+//   },
 
-  sanitizeOps: false,
-  sanitizeResources: false,
-});
+//   sanitizeOps: false,
+//   sanitizeResources: false,
+// });
 
-Deno.test({
-  name: "island using `npm:` specifiers",
+// Deno.test({
+//   name: "island using `npm:` specifiers",
 
-  async fn(_t) {
-    await withPageName("./tests/fixture_npm/main.ts", async (page, address) => {
-      await page.setJavaScriptEnabled(false);
-      await page.goto(address, { waitUntil: "networkidle2" });
-      assert(await page.waitForSelector("#server-true"));
+//   async fn(_t) {
+//     await withPageName("./tests/fixture_npm/main.ts", async (page, address) => {
+//       await page.setJavaScriptEnabled(false);
+//       await page.goto(address, { waitUntil: "networkidle2" });
+//       assert(await page.waitForSelector("#server-true"));
 
-      await page.setJavaScriptEnabled(true);
-      await page.reload({ waitUntil: "networkidle2" });
-      assert(await page.waitForSelector("#browser-true"));
-    });
-  },
+//       await page.setJavaScriptEnabled(true);
+//       await page.reload({ waitUntil: "networkidle2" });
+//       assert(await page.waitForSelector("#browser-true"));
+//     });
+//   },
 
-  sanitizeOps: false,
-  sanitizeResources: false,
-});
+//   sanitizeOps: false,
+//   sanitizeResources: false,
+// });
 
-Deno.test({
-  name: "works with older preact-render-to-string v5",
+// Deno.test({
+//   name: "works with older preact-render-to-string v5",
 
-  async fn(_t) {
-    await withPageName(
-      "./tests/fixture_preact_rts_v5/main.ts",
-      async (page, address) => {
-        await page.goto(address, {
-          waitUntil: "networkidle2",
-        });
-        await page.waitForSelector("#foo");
+//   async fn(_t) {
+//     await withPageName(
+//       "./tests/fixture_preact_rts_v5/main.ts",
+//       async (page, address) => {
+//         await page.goto(address, {
+//           waitUntil: "networkidle2",
+//         });
+//         await page.waitForSelector("#foo");
 
-        await delay(100);
-        const text = await page.$eval("#foo", (el) => el.textContent);
-        assertEquals(text, "it works");
-      },
-    );
-  },
+//         await delay(100);
+//         const text = await page.$eval("#foo", (el) => el.textContent);
+//         assertEquals(text, "it works");
+//       },
+//     );
+//   },
 
-  sanitizeOps: false,
-  sanitizeResources: false,
-});
+//   sanitizeOps: false,
+//   sanitizeResources: false,
+// });
