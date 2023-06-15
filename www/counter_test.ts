@@ -11,16 +11,16 @@ Deno.test("Test `Counter` island", {
     });
 
     const counterTextElem = await page.$(`#counter`);
-    const count = + await counterTextElem?.evaluate((el) => el.textContent);
+    const count = +await counterTextElem?.evaluate((el) => el.textContent);
     let value = count;
     const subBtnElem = await page.$(`#sub-rounded-btn`);
     await subBtnElem?.click();
-    value = + await counterTextElem?.evaluate((el) => el.textContent);
+    value = +await counterTextElem?.evaluate((el) => el.textContent);
     assertEquals(value, count - 1, `Should be count - 1`);
     const addBtnElem = await page.$(`#add-rounded-btn`);
     await addBtnElem?.click();
     await delay(100);
-    value = + await counterTextElem?.evaluate((el) => el.textContent);
+    value = +await counterTextElem?.evaluate((el) => el.textContent);
     assertEquals(value, count, `Should be count`);
   });
 });
