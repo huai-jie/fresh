@@ -1,6 +1,6 @@
 import {
   assert,
-  assertEquals,
+  // assertEquals,
   assertStringIncludes,
   delay,
   Page,
@@ -187,9 +187,9 @@ async function withPageName(
 //   sanitizeResources: false,
 // });
 
-async function getIslandParentTextContent(page: Page) {
-  return await page.$eval("#island-parent", (el: Element) => el.textContent);
-}
+// async function getIslandParentTextContent(page: Page) {
+//   return await page.$eval("#island-parent", (el: Element) => el.textContent);
+// }
 
 // Deno.test({
 //   name: "island that returns `null`",
