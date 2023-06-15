@@ -4,7 +4,6 @@ import {
   assertStringIncludes,
   delay,
   Page,
-  puppeteer,
 } from "./deps.ts";
 import { withPageName } from "./test_utils.ts";
 
